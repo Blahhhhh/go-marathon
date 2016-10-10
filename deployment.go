@@ -56,11 +56,51 @@ type StepActions struct {
 
 // DeploymentPlan is a collection of steps for application deployment
 type DeploymentPlan struct {
-	ID       string            `json:"id"`
-	Version  string            `json:"version"`
-	Original *Group            `json:"original"`
-	Target   *Group            `json:"target"`
-	Steps    []*DeploymentStep `json:"steps"`
+	ID       	string            	`json:"id"`
+	Version  	string            	`json:"version"`
+	Original 	*Group            	`json:"original"`
+	Target   	*Group            	`json:"target"`
+	Steps    	[]*DeploymentStep 	`json:"-"`
+	XXStepsRaw	json.RawMessage		`json:"steps"` // Holds raw steps JSON to unmarshal later
+}
+
+// Allows loading of deployment steps from the Marathon v1.X API
+func (d *DeploymentPlan) UnmarshalJSON(b []byte) error {
+	dp := &struct {
+		ID       	string            	`json:"id"`
+		Version  	string            	`json:"version"`
+		Original 	*Group            	`json:"original"`
+		Target   	*Group            	`json:"target"`
+		XXStepsRaw  json.RawMessage 	`json:"steps"`
+	}{}
+	err := json.Unmarshal(b, &dp)
+	if err != nil {
+		return err
+	}
+	d.ID = dp.ID
+	d.Version = dp.Version
+	d.Original = dp.Original
+	d.Target = dp.Target
+	var deploymentStepArray []*DeploymentStep
+	if len(dp.XXStepsRaw) != 0 {
+		err = json.Unmarshal(dp.XXStepsRaw, &deploymentStepArray)
+		if err != nil {
+			return err
+		}
+		d.Steps = deploymentStepArray
+	}
+	if len(d.Steps)>0 && d.Steps[0].Action == "" {
+		var stepActionsArray []*StepActions
+		err = json.Unmarshal(dp.XXStepsRaw, &stepActionsArray)
+		if err != nil {
+			return err
+		}
+		for stepIndex, step := range stepActionsArray {
+			d.Steps[stepIndex].Action = step.Actions[0].Type
+			d.Steps[stepIndex].App = step.Actions[0].App
+		}
+	}
+	return nil
 }
 
 // Deployments retrieves a list of current deployments
