@@ -140,8 +140,12 @@ var testCases = testCaseList{
 		"target": {},
 		"steps": [
 			{
-				"action": "ScaleApplication",
-				"app": "/my-app"
+				"actions": [
+					{
+						"type": "ScaleApplication",
+						"app": "/my-app"
+					}
+				]
 			}
 		]
 	},
@@ -162,69 +166,17 @@ var testCases = testCaseList{
 				Version: "2016-07-29T08:03:52.542Z",
 				Original: &Group{},
 				Target: &Group{},
-				Steps: []*DeploymentStep {
-					{
-						Action: "ScaleApplication",
-						App: "/my-app",
-					},
-				},
-			},
-			CurrentStep: &StepActions{
-				Actions: []struct {
-					Type string `json:"type"`
-					App  string `json:"app"`
-				}{
-					{
-						Type: "ScaleApplication",
-						App:  "/my-app",
-					},
-				},
-			},
-		},
-	},
-	// For marathon 1.X
-	testCase{
-		name: "deployment_step_success",
-		source: `{
-	"eventType": "deployment_step_success",
-	"timestamp": "2016-09-29T03:15:40.176Z",
-	"plan": {
-		"id": "dcf63e4a-ef27-4816-e865-1730fcb26ac3",
-		"version": "2016-09-29T03:15:40.176Z",
-		"original": {},
-		"target": {},
-		"steps": [
-			{
-				"actions": [
-					{
-						"type": "ScaleApplication",
-						"app": "/my-app"
-					}
-				]
-			}
-		]
-	},
-	"currentStep": {
-		"actions": [
-			{
-				"type": "ScaleApplication",
-				"app": "/my-app"
-			}
-		]
-	}
-}`,
-		expectation: &EventDeploymentStepSuccess{
-			EventType: "deployment_step_success",
-			Timestamp: "2016-09-29T03:15:40.176Z",
-			Plan:      &DeploymentPlan{
-				ID: "dcf63e4a-ef27-4816-e865-1730fcb26ac3",
-				Version: "2016-09-29T03:15:40.176Z",
-				Original: &Group{},
-				Target: &Group{},
-				Steps: []*DeploymentStep {
-					{
-						Action: "ScaleApplication",
-						App: "/my-app",
+				Steps: []*StepActions{
+					&StepActions{
+						Actions: []struct {
+							Type string `json:"type"`
+							App  string `json:"app"`
+						}{
+							{
+								Type: "ScaleApplication",
+								App:  "/my-app",
+							},
+						},
 					},
 				},
 			},
@@ -301,7 +253,7 @@ func TestEventStreamEventsReceived(t *testing.T) {
 	endpoint := newFakeMarathonEndpoint(t, &config)
 	defer endpoint.Close()
 
-	events, err := endpoint.Client.AddEventsListener(EventIDApplications | EventIDDeploymentInfo | EventIDDeploymentStepSuccess)
+	events, err := endpoint.Client.AddEventsListener(EventIDApplications | EventIDDeploymentInfo)
 	assert.NoError(t, err)
 
 	almostAllTestCases := testCases[:len(testCases)-1]
