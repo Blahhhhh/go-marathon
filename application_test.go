@@ -488,29 +488,45 @@ func TestWaitOnApplication(t *testing.T) {
 	waitTime := 100 * time.Millisecond
 
 	tests := []struct {
-		desc    string
-		timeout time.Duration
-		appName string
+		desc          string
+		timeout       time.Duration
+		appName       string
+		testScope     string
+		shouldSucceed bool
 	}{
 		{
-			desc:    "existing app / timeout > ticker",
-			timeout: 200 * time.Millisecond,
-			appName: fakeAppName,
+			desc:          "initially existing app",
+			timeout:       0,
+			appName:       fakeAppName,
+			shouldSucceed: true,
+		},
+
+		{
+			desc:          "delayed existing app | timeout > ticker",
+			timeout:       200 * time.Millisecond,
+			appName:       fakeAppName,
+			testScope:     "wait-on-app",
+			shouldSucceed: true,
+		},
+
+		{
+			desc:          "delayed existing app | timeout < ticker",
+			timeout:       50 * time.Millisecond,
+			appName:       fakeAppName,
+			testScope:     "wait-on-app",
+			shouldSucceed: false,
 		},
 		{
-			desc:    "missing app / timeout > ticker",
-			timeout: 200 * time.Millisecond,
-			appName: "no_such_app",
+			desc:          "missing app | timeout > ticker",
+			timeout:       200 * time.Millisecond,
+			appName:       "no_such_app",
+			shouldSucceed: false,
 		},
 		{
-			desc:    "existing app / timeout < ticker",
-			timeout: 50 * time.Millisecond,
-			appName: fakeAppName,
-		},
-		{
-			desc:    "missing app / timeout < ticker",
-			timeout: 50 * time.Millisecond,
-			appName: "no_such_app",
+			desc:          "missing app | timeout < ticker",
+			timeout:       50 * time.Millisecond,
+			appName:       "no_such_app",
+			shouldSucceed: false,
 		},
 	}
 
@@ -519,6 +535,9 @@ func TestWaitOnApplication(t *testing.T) {
 		defaultConfig.PollingWaitTime = waitTime
 		configs := &configContainer{
 			client: &defaultConfig,
+			server: &serverConfig{
+				scope: test.testScope,
+			},
 		}
 
 		endpoint := newFakeMarathonEndpoint(t, configs)
@@ -530,7 +549,7 @@ func TestWaitOnApplication(t *testing.T) {
 		}()
 		timer := time.NewTimer(400 * time.Millisecond)
 		<-timer.C
-		if test.appName == fakeAppName {
+		if test.shouldSucceed {
 			assert.NoError(t, err, test.desc)
 		} else {
 			assert.IsType(t, err, ErrTimeoutError, test.desc)
@@ -544,4 +563,52 @@ func TestAppExistAndRunning(t *testing.T) {
 	client := endpoint.Client.(*marathonClient)
 	assert.True(t, client.appExistAndRunning(fakeAppName))
 	assert.False(t, client.appExistAndRunning("no_such_app"))
+}
+
+func TestSetIPPerTask(t *testing.T) {
+	app := Application{}
+	app.Ports = append(app.Ports, 10)
+	app.AddPortDefinition(PortDefinition{})
+	assert.Nil(t, app.IPAddressPerTask)
+	assert.Equal(t, 1, len(app.Ports))
+	assert.Equal(t, 1, len(*app.PortDefinitions))
+
+	app.SetIPAddressPerTask(IPAddressPerTask{})
+	assert.NotNil(t, app.IPAddressPerTask)
+	assert.Equal(t, 0, len(app.Ports))
+	assert.Equal(t, 0, len(*app.PortDefinitions))
+}
+
+func TestIPAddressPerTask(t *testing.T) {
+	ipPerTask := IPAddressPerTask{}
+	assert.Nil(t, ipPerTask.Groups)
+	assert.Nil(t, ipPerTask.Labels)
+
+	ipPerTask.AddGroup("label")
+	ipPerTask.AddLabel("key", "value")
+
+	assert.Equal(t, 1, len(*ipPerTask.Groups))
+	assert.Equal(t, "label", (*ipPerTask.Groups)[0])
+	assert.Equal(t, "value", (*ipPerTask.Labels)["key"])
+
+	ipPerTask.EmptyGroups()
+	assert.Equal(t, 0, len(*ipPerTask.Groups))
+
+	ipPerTask.EmptyLabels()
+	assert.Equal(t, 0, len(*ipPerTask.Labels))
+
+}
+
+func TestIPAddressPerTaskDiscovery(t *testing.T) {
+	disc := Discovery{}
+	assert.Nil(t, disc.Ports)
+
+	disc.AddPort(Port{})
+	assert.NotNil(t, disc.Ports)
+	assert.Equal(t, 1, len(*disc.Ports))
+
+	disc.EmptyPorts()
+	assert.NotNil(t, disc.Ports)
+	assert.Equal(t, 0, len(*disc.Ports))
+
 }

@@ -5,8 +5,16 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## [0.4.0] - 2016-10-28
 ### Added
+- [#223][PR223] Add support for IP-per-task.
+- [#220][PR220] Add external volume definition to container.
 - [#211][PR211] Close event channel on event listener removal.
+
+### Fixed
+- [#218][PR218] Remove TimeWaitPolling from marathonClient.
+- [#214][PR214] Remove extra pointer layers when passing to r.api*.
 
 ## [0.3.0] - 2016-09-28
 - [#201][PR201]: Subscribe method is now exposed on the client to allow subscription of callback URL's
@@ -70,12 +78,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - Initial SemVer release.
 
-[Unreleased]: https://github.com/gambol99/go-marathon/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/gambol99/go-marathon/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/gambol99/go-marathon/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/gambol99/go-marathon/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/gambol99/go-marathon/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/gambol99/go-marathon/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/gambol99/go-marathon/compare/v0.0.1...v0.1.0
 
+[PR223]: https://github.com/gambol99/go-marathon/pull/223
+[PR220]: https://github.com/gambol99/go-marathon/pull/220
+[PR218]: https://github.com/gambol99/go-marathon/pull/218
+[PR214]: https://github.com/gambol99/go-marathon/pull/214
 [PR211]: https://github.com/gambol99/go-marathon/pull/211
 [PR205]: https://github.com/gambol99/go-marathon/pull/205
 [PR202]: https://github.com/gambol99/go-marathon/pull/202
