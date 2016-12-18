@@ -297,6 +297,21 @@ func TestApplications(t *testing.T) {
 	assert.Equal(t, len(applications.Apps), 1)
 }
 
+func TestApplicationsEmbedTaskStats(t *testing.T) {
+	endpoint := newFakeMarathonEndpoint(t, nil)
+	defer endpoint.Close()
+
+	v := url.Values{}
+	v.Set("embed", "apps.taskStats")
+	applications, err := endpoint.Client.Applications(v)
+	assert.NoError(t, err)
+	assert.NotNil(t, applications)
+	assert.Equal(t, len(applications.Apps), 1)
+	assert.NotNil(t, applications.Apps[0].TaskStats)
+	assert.Equal(t, applications.Apps[0].TaskStats["startedAfterLastScaling"].Stats.Counts["healthy"], 1)
+	assert.Equal(t, applications.Apps[0].TaskStats["startedAfterLastScaling"].Stats.LifeTime["averageSeconds"], 17024.575)
+}
+
 func TestListApplications(t *testing.T) {
 	endpoint := newFakeMarathonEndpoint(t, nil)
 	defer endpoint.Close()
@@ -583,13 +598,17 @@ func TestIPAddressPerTask(t *testing.T) {
 	ipPerTask := IPAddressPerTask{}
 	assert.Nil(t, ipPerTask.Groups)
 	assert.Nil(t, ipPerTask.Labels)
+	assert.Nil(t, ipPerTask.Discovery)
 
-	ipPerTask.AddGroup("label")
-	ipPerTask.AddLabel("key", "value")
+	ipPerTask.
+		AddGroup("label").
+		AddLabel("key", "value").
+		SetDiscovery(Discovery{})
 
 	assert.Equal(t, 1, len(*ipPerTask.Groups))
 	assert.Equal(t, "label", (*ipPerTask.Groups)[0])
 	assert.Equal(t, "value", (*ipPerTask.Labels)["key"])
+	assert.NotEmpty(t, ipPerTask.Discovery)
 
 	ipPerTask.EmptyGroups()
 	assert.Equal(t, 0, len(*ipPerTask.Groups))
