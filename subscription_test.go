@@ -170,9 +170,9 @@ var testCases = testCaseList{
 				Steps: []*StepActions{
 					&StepActions{
 						Actions: []struct {
-							Action	string	`json:"action"`
-							Type	string	`json:"type"`
-							App	string	`json:"app"`
+							Action string `json:"action"`
+							Type   string `json:"type"`
+							App    string `json:"app"`
 						}{
 							{
 								Type: "ScaleApplication",
@@ -184,9 +184,9 @@ var testCases = testCaseList{
 			},
 			CurrentStep: &StepActions{
 				Actions: []struct {
-					Action	string	`json:"action"`
-					Type	string	`json:"type"`
-					App	string	`json:"app"`
+					Action string `json:"action"`
+					Type   string `json:"type"`
+					App    string `json:"app"`
 				}{
 					{
 						Type: "ScaleApplication",
@@ -231,20 +231,20 @@ var testCases = testCaseList{
 			EventType: "deployment_info",
 			Timestamp: "2016-07-29T08:03:52.542Z",
 			Plan: &DeploymentPlan{
-				ID: "dcf63e4a-ef27-4816-e865-1730fcb26ac3",
-				Version: "2016-07-29T08:03:52.542Z",
+				ID:       "dcf63e4a-ef27-4816-e865-1730fcb26ac3",
+				Version:  "2016-07-29T08:03:52.542Z",
 				Original: &Group{},
-				Target: &Group{},
+				Target:   &Group{},
 				Steps: []*StepActions{
 					&StepActions{
 						Actions: []struct {
-							Action	string	`json:"action"`
-							Type	string	`json:"type"`
-							App	string	`json:"app"`
+							Action string `json:"action"`
+							Type   string `json:"type"`
+							App    string `json:"app"`
 						}{
 							{
 								Action: "ScaleApplication",
-								App:  "/my-app",
+								App:    "/my-app",
 							},
 						},
 					},
@@ -252,13 +252,13 @@ var testCases = testCaseList{
 			},
 			CurrentStep: &StepActions{
 				Actions: []struct {
-					Action	string	`json:"action"`
-					Type	string	`json:"type"`
-					App	string	`json:"app"`
+					Action string `json:"action"`
+					Type   string `json:"type"`
+					App    string `json:"app"`
 				}{
 					{
 						Action: "ScaleApplication",
-						App:  "/my-app",
+						App:    "/my-app",
 					},
 				},
 			},

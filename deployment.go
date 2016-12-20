@@ -49,9 +49,9 @@ type DeploymentStep struct {
 // StepActions is a series of deployment steps
 type StepActions struct {
 	Actions []struct {
-		Action 	string	`json:"action"`	// 1.1.2 and after
-		Type 	string	`json:"type"`	// 1.1.1 and before
-		App  	string	`json:"app"`
+		Action string `json:"action"` // 1.1.2 and after
+		Type   string `json:"type"`   // 1.1.1 and before
+		App    string `json:"app"`
 	}
 }
 
@@ -86,7 +86,7 @@ func (r *marathonClient) Deployments() ([]*Deployment, error) {
 				deployment.Steps = append(deployment.Steps, make([]*DeploymentStep, len(step.Actions)))
 				for actionIndex, action := range step.Actions {
 					var stepAction string
-					if (action.Type != "") {
+					if action.Type != "" {
 						stepAction = action.Type
 					} else {
 						stepAction = action.Action
